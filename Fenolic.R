@@ -2,7 +2,7 @@
 Sys.setenv(LANG = "en_US.UTF-8")
 #Library
 library(pacman)
-pacman::p_load(readxl, ggplot2, scales, extrafont)
+pacman::p_load(readxl, ggplot2, scales, extrafont, stringr)
 setwd("E:/Eranthis")
 fenolic <- read_excel("fenolic.xlsx")
 
@@ -37,19 +37,22 @@ ggplot(fenolic_long, aes(x = factor(name, levels = unique(name)), y = value, fil
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_y_continuous(labels = comma, breaks = seq(0, max(fenolic_long$value), by = 50000000))
 
-loadfonts(device = "win", quiet = TRUE)
 font <- "Palatino Linotype"
 
+fenolic_long$variable_label <- str_to_title(fenolic_long$variable)
+
+
 ggplot(fenolic_long, aes(x = factor(name, levels = unique(name)), y = value, fill = variable)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(x = "Сompound", y = "Peak area, ion count") +
+  geom_bar(stat = "identity", position = "dodge", size = 1.5) +
+  labs(x = "Сompound", y = "Peak area, ion count",
+       fill = "Variable:") +
   scale_fill_manual(values = c("leaves" = "green", "flowers" = "red")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, family = font),
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, family = font, face = "bold"),
         text = element_text(family = font),
-        axis.title = element_text(family = font),
-        plot.title = element_text(family = font),
+        axis.title = element_text(family = font, face = "bold"),
+        plot.title = element_text(family = font, face = "bold"),
         legend.text = element_text(family = font),
-        legend.title = element_text(family = font),
+        legend.title = element_text(family = font, face = "bold"),
         legend.position = "right") +
   scale_y_continuous(labels = comma, breaks = seq(0, max(fenolic_long$value), by = 50000000))
