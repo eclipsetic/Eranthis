@@ -56,3 +56,4 @@ ggplot(fenolic_long, aes(x = factor(name, levels = unique(name)), y = value, fil
         legend.title = element_text(family = font, face = "bold"),
         legend.position = "right") +
   scale_y_continuous(labels = comma, breaks = seq(0, max(fenolic_long$value), by = 50000000))
+
