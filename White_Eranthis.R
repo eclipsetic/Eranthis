@@ -11,12 +11,12 @@ pacman::p_load(lubridate, purrr, dplyr, tidyr, forecast, zoo, rlang, ggplot2, ti
 # Read all lists in file
 file_path <- "E:/Eranthis/White_E.xlsx"
 White <- read_xlsx("White_E.xlsx")
-
+White$Num_SP <- paste(White$Number, White$Species, sep = "_")
 # Create a distance matrix
 dist_matrix <- dist(White)
 
 # Perform hierarchical clustering
-hc <- hclust(dist_matrix, method = "ward.D2")
+hc <- hclust(dist_matrix, method = "ward.D")
 
 # Plot the dendrogram
-plot(hc, main = "Hierarchical Clustering Dendrogram", sub = NULL, xlab = NULL, cex = 0.8, labels = White$Species)
+plot(hc, main = "Hierarchical Clustering Dendrogram", sub = NULL, xlab = NULL, cex = 1, labels = White$Num_SP)
