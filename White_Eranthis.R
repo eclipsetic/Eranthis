@@ -16,7 +16,7 @@ White$Num_SP <- paste(White$Number, White$Species, sep = "_")
 dist_matrix <- dist(White)
 
 # Perform hierarchical clustering
-hc <- hclust(dist_matrix, method = "ward.D")
+hc <- hclust(dist_matrix, method = "single")
 
 # Plot the dendrogram
 plot(hc, main = "Hierarchical Clustering Dendrogram", sub = NULL, xlab = NULL, cex = 1, labels = White$Num_SP)

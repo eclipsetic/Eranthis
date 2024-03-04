@@ -4,7 +4,7 @@ Sys.setenv(LANG = "en_US.UTF-8")
 library(pacman)
 pacman::p_load(lubridate, purrr, dplyr, tidyr, forecast, zoo, rlang, ggplot2, tidyverse, raster,
   sp, geodata, terra, rasterVis, BiocManager, dismo, XML, jsonlite, rgdal, rJava,
-  readxl, rgbif, factoextra, NbClust, cluster, openxlsx, caret, mice, missForest, knitr
+  readxl, rgbif, factoextra, NbClust, cluster, openxlsx, caret, mice, missForest, knitr, FactoMineR
 )
 
 
@@ -126,12 +126,17 @@ plot(hc, main = "Hierarchical Clustering Dendrogram", sub = NULL, xlab = NULL, c
 
 combined_data <- combined_data %>%
   mutate_at(vars(2:45), as.numeric)
-# Выбираем только числовые столбцы
-numeric_columns <- combined_data %>% 
-  select_if(is.numeric)
 
-# Вычисляем корреляцию
-correlation_matrix <- cor(numeric_columns)
+combined_data_factorized <- lapply(combined_data, function(x) {
+  if(is.character(x)) {
+    as.factor(x)
+  } else {
+    x
+  }
+})
+combined_data_factorized <- as.data.frame(combined_data_factorized)
 
-# Выводим матрицу корреляции
-print(correlation_matrix, digits = 2)
+pca_result <- prcomp(combined_data_factorized, scale. = TRUE, na.fail)
+
+
+PCA(combined_data, scale.unit = TRUE, ncp = 3, graph = TRUE)
