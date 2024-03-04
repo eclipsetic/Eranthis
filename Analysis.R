@@ -4,9 +4,11 @@ Sys.setenv(LANG = "en_US.UTF-8")
 library(pacman)
 pacman::p_load(lubridate, purrr, dplyr, tidyr, forecast, zoo, rlang, ggplot2, tidyverse, raster,
   sp, geodata, terra, rasterVis, BiocManager, dismo, XML, jsonlite, rgdal, rJava,
-  readxl, rgbif, factoextra, NbClust, cluster, openxlsx, caret, mice, missForest, knitr, FactoMineR
+  readxl, rgbif, factoextra, NbClust, cluster, openxlsx, caret, mice, missForest, knitr, htmltools,
+  FactoMineR, missMDA, pcaMethods, caret
 )
-
+#Empty Global Enviroment
+rm(list = ls())
 
 # Read all lists in file
 file_path <- "E:/Eranthis/Eranthis_morph.xlsx"
@@ -87,56 +89,57 @@ all_dataframes <- list("E.sibirica", "E.tanhoensis", "E.sibirica_x_E.tanhoensis"
                        "E.stellata", "E.stellata.Korea.", "E.pinnatifida", "E.pungdoensis", "E.albiflora",
                        "E.lobulata", "E.byunsanensis")
 
-# For Making Means instead of NA
-for (df_name in all_dataframes) {
-  df <- get(df_name)
-  df <- lapply(df, function(x) {
-    ifelse(is.na(x), mean(x, na.rm = TRUE), x)
-  })
-  assign(df_name, df, envir = .GlobalEnv)
-}
 
 #Making One table
 tables <- lapply(all_dataframes, get)
 tables <- lapply(tables, as.data.frame)
 tables <- lapply(tables, function(tbl) mutate_all(tbl, as.character))
+
+tables <- lapply(seq_along(all_dataframes), function(i) {
+  df <- get(all_dataframes[[i]])  
+  df <- mutate(df, Species = as.numeric(df$Species))
+  df
+})
+
 combined_data <- bind_rows(tables)
-write.xlsx(combined_data, "combined_data.xlsx", rowNames = FALSE)
-combined_data <- read.xlsx("combined_data.xlsx")
+combined_data <- combined_data[-c(103:107), -c(1,3,48) ]
 
-#MAking Means to One
+#Species to Numbers
+combined_data$Species <- factor(combined_data$Species, levels = unique(combined_data$Species))
+combined_data$Species <- as.numeric(factor(combined_data$Species))
+
+# MLR -------------------------------------------------------------------------------------------------------------
 combined_data <- combined_data %>%
-  mutate_at(vars(2:45), as.numeric)
+  mutate_at(vars(2:45), ~as.numeric(.))
 
-combined_data <- combined_data %>%
-  group_by(Species) %>%
-  summarize(across(everything(), ~ mean(., na.rm = TRUE)))
+model_fr <- combined_data[ , c(1,3,5,7,9,13,15,17,19,21,23)]
+model_fl <- combined_data[ , c(1,)]
 
+model_fr <- na.omit(model_fr)
+
+model <- lm(Species ~ . - Species, data = model_fr)
+hist(residuals(model), col = "steelblue")
+plot(fitted(model), residuals(model))
+
+summary(model)
 # Create a distance matrix
-dist_matrix <- dist(combined_data)
+dist_matrix <- dist(model_fr)
 
 # Perform hierarchical clustering
 hc <- hclust(dist_matrix, method = "ward.D2")
 
 # Plot the dendrogram
-plot(hc, main = "Hierarchical Clustering Dendrogram", sub = NULL, xlab = NULL, cex = 0.8, labels = combined_data$Species)
+plot(hc, main = "Hierarchical Clustering Dendrogram", sub = NULL, xlab = NULL, cex = 0.8, labels = model_fr$Species)
 
 
 # PCA -------------------------------------------------------------------------------------------------------------
 
-combined_data <- combined_data %>%
-  mutate_at(vars(2:45), as.numeric)
+model_fr$Species <- factor(model_fr$Species, levels = unique(model_fr$Species))
+model_fr$Species <- as.numeric(factor(model_fr$Species))
 
-combined_data_factorized <- lapply(combined_data, function(x) {
-  if(is.character(x)) {
-    as.factor(x)
-  } else {
-    x
-  }
-})
-combined_data_factorized <- as.data.frame(combined_data_factorized)
+model_fr$Species <- as.factor(model_fr[, 1])
 
-pca_result <- prcomp(combined_data_factorized, scale. = TRUE, na.fail)
-
-
-PCA(combined_data, scale.unit = TRUE, ncp = 3, graph = TRUE)
+res.pca <- PCA(model_fr[2:11], graph = FALSE)
+print(summary(res.pca))
+fviz(res.pca, "var", habillage = model_fr[, 1])
+ 
