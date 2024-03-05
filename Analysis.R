@@ -5,7 +5,7 @@ library(pacman)
 pacman::p_load(lubridate, purrr, dplyr, tidyr, forecast, zoo, rlang, ggplot2, tidyverse, raster,
   sp, geodata, terra, rasterVis, BiocManager, dismo, XML, jsonlite, rgdal, rJava,
   readxl, rgbif, factoextra, NbClust, cluster, openxlsx, caret, mice, missForest, knitr, htmltools,
-  FactoMineR, missMDA, pcaMethods, caret
+  FactoMineR, missMDA, pcaMethods, caret, ggfortify, gridExtra, hrbrthemes, corrplot
 )
 #Empty Global Enviroment
 rm(list = ls())
@@ -96,26 +96,26 @@ tables <- lapply(tables, as.data.frame)
 tables <- lapply(tables, function(tbl) mutate_all(tbl, as.character))
 
 tables <- lapply(seq_along(all_dataframes), function(i) {
-  df <- get(all_dataframes[[i]])  
-  df <- mutate(df, Species = as.numeric(df$Species))
-  df
+  df <- get(all_dataframes[[i]])
+  df <- as.data.frame(mutate_all(df, as.character))
+  df <- df[complete.cases(df$Species), ]
+  df$Species <- all_dataframes[[i]]  # Здесь изменено
+  return(df)
 })
 
 combined_data <- bind_rows(tables)
-combined_data <- combined_data[-c(103:107), -c(1,3,48) ]
-
-#Species to Numbers
-combined_data$Species <- factor(combined_data$Species, levels = unique(combined_data$Species))
-combined_data$Species <- as.numeric(factor(combined_data$Species))
+combined_data <- combined_data[, -c(1,3,48) ]
 
 # MLR -------------------------------------------------------------------------------------------------------------
 combined_data <- combined_data %>%
   mutate_at(vars(2:45), ~as.numeric(.))
 
 model_fr <- combined_data[ , c(1,3,5,7,9,13,15,17,19,21,23)]
+model_fr <- na.omit(model_fr)
+
 model_fl <- combined_data[ , c(1,)]
 
-model_fr <- na.omit(model_fr)
+
 
 model <- lm(Species ~ . - Species, data = model_fr)
 hist(residuals(model), col = "steelblue")
@@ -134,12 +134,57 @@ plot(hc, main = "Hierarchical Clustering Dendrogram", sub = NULL, xlab = NULL, c
 
 # PCA -------------------------------------------------------------------------------------------------------------
 
-model_fr$Species <- factor(model_fr$Species, levels = unique(model_fr$Species))
-model_fr$Species <- as.numeric(factor(model_fr$Species))
 
-model_fr$Species <- as.factor(model_fr[, 1])
+res.pca <- PCA(model_fr, quali.sup=c(1), graph =  FALSE)
+fviz_pca_biplot(res.pca, label = "var", habillage = 1, addEllipses = TRUE, pointsize = 2,
+                ellipse.level = 0.95, geom.ind = "point", ggtheme = theme_minimal()) +
+  scale_color_brewer(palette = "Set1")
 
-res.pca <- PCA(model_fr[2:11], graph = FALSE)
-print(summary(res.pca))
-fviz(res.pca, "var", habillage = model_fr[, 1])
- 
+
+pca_res <- prcomp(model_fr[,2:11], scale. = TRUE)
+autoplot(pca_res, data = model_fr, colour = 'Species',  loadings = TRUE, loadings.colour = 'blue',
+         loadings.label = TRUE, loadings.label.size = 3, addEllipses=TRUE)
+
+
+# Plotting --------------------------------------------------------------------------------------------------------
+target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
+
+# 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis'                                                                                       
+# 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis', 'E.krasnoborovii', 'E.sineli'                                                         
+# 'E.sineli', 'E.stellata', 'E.koreana'                                                                                                 
+# 'E.stellata', 'E.koreana'                                                                                                            
+# 'E.albiflora', 'E.lobulata'                                                                                                          
+# 'E.pinnatifida', 'E.byunsanensis', 'E.pungdoensis'                                                                                    
+# 'E.byunsanensis', 'E.pungdoensis'                                                                                                     
+# 'E.albiflora', 'E.lobulata', 'E.sibirica', 'E.tanhoensis', 'E.stellata', 'E.pinnatifida', 'E.byunsanensis'
+
+filtered_data <- model_fr[model_fr$Species %in% target_species, ]
+res.pca <- PCA(filtered_data, quali.sup = 1, graph = FALSE)
+fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var="black",
+                addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95)
+  scale_color_brewer(palette = "Set1") +
+  theme_ipsum()
+
+  
+var <- get_pca_var(res.pca)
+corrplot(var$cos2, is.corr=FALSE)
+corrplot(var$contrib, is.corr=FALSE)   
+#Target species
+plots <- list()
+
+for (species_level in target_species) {
+    filtered_data <- subset(model_fr, Species == species_level)
+    if (nrow(filtered_data) > 0) {
+    res.pca <- PCA(filtered_data, quali.sup = 1, graph = FALSE)
+    plot <- fviz_pca_biplot(res.pca, label = "var",
+                            addEllipses = TRUE, pointsize = 2, ellipse.level = 0.95, geom.ind = "point", 
+                            pointshape = 16, alpha.ind = 0.5) +
+      scale_color_brewer(palette = "Set1") +
+      theme_minimal() +
+      ggtitle(paste("Species:", species_level))
+      plots[[length(plots) + 1]] <- plot
+    }
+}
+
+grid.arrange(grobs = plots)
+
