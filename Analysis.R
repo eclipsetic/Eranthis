@@ -147,7 +147,7 @@ autoplot(pca_res, data = model_fr, colour = 'Species',  loadings = TRUE, loading
 
 
 # Plotting --------------------------------------------------------------------------------------------------------
-target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
+target_species <- c('E.pinnatifida', 'E.byunsanensis', 'E.pungdoensis')
 
 # 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis'                                                                                       
 # 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis', 'E.krasnoborovii', 'E.sineli'                                                         
@@ -159,13 +159,13 @@ target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
 # 'E.albiflora', 'E.lobulata', 'E.sibirica', 'E.tanhoensis', 'E.stellata', 'E.pinnatifida', 'E.byunsanensis'
 
 filtered_data <- model_fr[model_fr$Species %in% target_species, ]
-res.pca <- PCA(filtered_data, quali.sup = 1, graph = FALSE)
-fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var="black",
-                addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95)
+res.pca <- PCA(filtered_data, quali.sup = 1, graph = FALSE, ncp = 2)
+fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var = "black",
+                addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95,
+                mean.point = FALSE, ellipse.alpha = 0, repel = TRUE) +
   scale_color_brewer(palette = "Set1") +
-  theme_ipsum()
+  theme_minimal()
 
-  
 var <- get_pca_var(res.pca)
 corrplot(var$cos2, is.corr=FALSE)
 corrplot(var$contrib, is.corr=FALSE)   
@@ -187,4 +187,3 @@ for (species_level in target_species) {
 }
 
 grid.arrange(grobs = plots)
-
