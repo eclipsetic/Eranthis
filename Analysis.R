@@ -5,7 +5,7 @@ library(pacman)
 pacman::p_load(lubridate, purrr, dplyr, tidyr, forecast, zoo, rlang, ggplot2, tidyverse, raster,
   sp, geodata, terra, rasterVis, BiocManager, dismo, XML, jsonlite, rgdal, rJava,
   readxl, rgbif, factoextra, NbClust, cluster, openxlsx, caret, mice, missForest, knitr, htmltools,
-  FactoMineR, missMDA, pcaMethods, caret, ggfortify, gridExtra, hrbrthemes, corrplot
+  FactoMineR, missMDA, pcaMethods, caret, ggfortify, gridExtra, hrbrthemes, corrplot, mice
 )
 #Empty Global Enviroment
 rm(list = ls())
@@ -90,6 +90,21 @@ all_dataframes <- list("E.sibirica", "E.tanhoensis", "E.sibirica_x_E.tanhoensis"
                        "E.lobulata", "E.byunsanensis")
 
 
+# Table with MICE ---------------------------------------------------------------------------------------------------
+imputed_dataframes <- list()
+
+for (df_name in all_dataframes) {
+  df <- get(df_name)
+  df <- df[, -c(1,3,45,46,47)]
+  df[, 2:42] <- lapply(df[, 2:42], as.numeric)
+  df$Species <- df_name
+  imp <- mice(data = df, method = 'cart', m = 5, seed=500)
+  completed_df <- complete(imp)
+  imputed_dataframes[[df_name]] <- completed_df
+}
+
+combined_data <- do.call(rbind, imputed_dataframes)
+
 #Making One table
 tables <- lapply(all_dataframes, get)
 tables <- lapply(tables, as.data.frame)
@@ -104,17 +119,20 @@ tables <- lapply(seq_along(all_dataframes), function(i) {
 })
 
 combined_data <- bind_rows(tables)
-combined_data <- combined_data[, -c(1,3,48) ]
-
-# MLR -------------------------------------------------------------------------------------------------------------
+combined_data <- combined_data[, -c(1,3,45,46,47,48) ]
 combined_data <- combined_data %>%
-  mutate_at(vars(2:45), ~as.numeric(.))
+  mutate_at(vars(2:42), ~as.numeric(.))
 
-model_fr <- combined_data[ , c(1,3,5,7,9,13,15,17,19,21,23)]
+imp <- mice(data = combined_data, method = 'rf', m = 1, seed=500)
+combined_data <- complete(imp)
+# MLR -------------------------------------------------------------------------------------------------------------
+
+#1,3,15,17,19,23,29,30,31
+model_fr <- combined_data[ , c(1,3,5,7,9,13,15,17,19,21,23,29,30,31)]
 model_fr <- na.omit(model_fr)
 
-model_fl <- combined_data[ , c(1,)]
-
+model_fl <- combined_data[ , c(1,2,4,6,8,12,14,16,18,20,22,24,25,26,27,28)]
+model_fl <- na.omit(model_fl)
 
 
 model <- lm(Species ~ . - Species, data = model_fr)
@@ -147,12 +165,12 @@ autoplot(pca_res, data = model_fr, colour = 'Species',  loadings = TRUE, loading
 
 
 # Plotting --------------------------------------------------------------------------------------------------------
-target_species <- c('E.pinnatifida', 'E.byunsanensis', 'E.pungdoensis')
+target_species <- c('E.sibirica','E.krasnoborovii')
 
 # 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis'                                                                                       
 # 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis', 'E.krasnoborovii', 'E.sineli'                                                         
-# 'E.sineli', 'E.stellata', 'E.koreana'                                                                                                 
-# 'E.stellata', 'E.koreana'                                                                                                            
+# 'E.sineli', 'E.stellata', 'E.stellata.Korea.'                                                                                                 
+# 'E.stellata', 'E.stellata.Korea.'                                                                                                            
 # 'E.albiflora', 'E.lobulata'                                                                                                          
 # 'E.pinnatifida', 'E.byunsanensis', 'E.pungdoensis'                                                                                    
 # 'E.byunsanensis', 'E.pungdoensis'                                                                                                     
