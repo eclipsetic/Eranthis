@@ -23,7 +23,7 @@ for (sheet_name in all_sheets) {
 # Downloading... --------------------------------------------------------------------------------------------------
 
 dir.create("E:/Eranthis/maps")
-bioclim <- getData(name="worldclim", download=TRUE, path = "E:/Eranthis/maps", res= 2.5, var="bio")
+bioclim <- getData(name="worldclim", download=FALSE, path = "E:/Eranthis/maps", res= 2.5, var="bio")
 
 
 # DataFrame -------------------------------------------------------------------------------------------------------
@@ -205,3 +205,25 @@ for (species_level in target_species) {
 }
 
 grid.arrange(grobs = plots)
+
+
+
+# E. pinnatifida --------------------------------------------------------------------------------------------------
+
+E.pinnatifida$Species <- paste (E.pinnatifida$Species, E.pinnatifida$`Sample ID`, sep=" _ ")
+E.pinnatifida_CD <- E.pinnatifida[, -c(1,3,34:47)]
+imp <- mice(data = E.pinnatifida_CD, method = 'logreg.boot', m = 5, seed=500)
+completed_df <- complete(imp)
+res.pca <- PCA(completed_df, quali.sup = 1)
+fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var = "black",
+                addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95,
+                mean.point = FALSE, ellipse.alpha = 0, repel = TRUE) +
+  scale_color_brewer(palette = "Set1") +
+  theme_minimal()
+
+
+
+
+
+
+
