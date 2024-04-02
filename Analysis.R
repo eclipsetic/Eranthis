@@ -5,7 +5,8 @@ library(pacman)
 pacman::p_load(lubridate, purrr, dplyr, tidyr, forecast, zoo, rlang, ggplot2, tidyverse, raster,
   sp, geodata, terra, rasterVis, BiocManager, dismo, XML, jsonlite, rgdal, rJava,
   readxl, rgbif, factoextra, NbClust, cluster, openxlsx, caret, mice, missForest, knitr, htmltools,
-  FactoMineR, missMDA, pcaMethods, caret, ggfortify, gridExtra, hrbrthemes, corrplot, mice
+  FactoMineR, missMDA, pcaMethods, caret, ggfortify, gridExtra, hrbrthemes, corrplot, mice,
+  caTools
 )
 #Empty Global Enviroment
 rm(list = ls())
@@ -114,7 +115,7 @@ tables <- lapply(seq_along(all_dataframes), function(i) {
   df <- get(all_dataframes[[i]])
   df <- as.data.frame(mutate_all(df, as.character))
   df <- df[complete.cases(df$Species), ]
-  df$Species <- all_dataframes[[i]]  # Здесь изменено
+  df$Species <- all_dataframes[[i]]
   return(df)
 })
 
@@ -222,8 +223,30 @@ fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var = "black",
   theme_minimal()
 
 
+# Multiple Linear Regression Modelling ----------------------------------------------------------------------------
+combined_data <- combined_data %>%
+  mutate_at(vars(2:42), ~as.numeric(.))
+
+set.seed(123)
+split = sample.split(combined_data$PHfl, SplitRatio = 0.5)
+training_set <- subset(combined_data, split == TRUE)
+test_set <- subset(combined_data, split == FALSE)
+
+sapply( lapply(training_set, unique), length)
+training_set <- training_set[, colSums(is.na(training_set)) != nrow(training_set)]
+values_count <- sapply(lapply(training_set, unique), length)
+
+regressor = lm(formula = PHfl ~ ., data = training_set, na.action = "na.omit")
+y_pred = predict(regressor, newdata = test_set)
+summary(y_pred)
+head(cbind(y_pred$PHfl,testing))
 
 
+# columns_to_impute <- c("Species", "PHfl", "PHfr", "BLSLfl", "BLSLfr", "BLSWfl", "BLSWfr", "BLSDfl", "BLSDfr", 
+#                      "BSLNfl", "BSLNfr", "BSTNfl", "BSTNfr", "CLSLfl", "CLSLfr", "CLSWfl", "CLSWfr", "CLSDfl", 
+#                       "CLSDfr", "CSLNfl", "CSLNfr", "CSTNfl", "CSTNfr", "SN", "SL", "SW", "PN", "PL", "FN", 
+#                       "FL", "StL", "LCfl", "BLA", "CLA", "FP", "FSP", "PS", "SP", "AAdLC", "AAbLC", "MLC", 
+#                       "SC")
 
 
 
