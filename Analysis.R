@@ -6,7 +6,7 @@ pacman::p_load(lubridate, purrr, dplyr, tidyr, forecast, zoo, rlang, ggplot2, ti
   sp, geodata, terra, rasterVis, BiocManager, dismo, XML, jsonlite, rgdal, rJava,
   readxl, rgbif, factoextra, NbClust, cluster, openxlsx, caret, mice, missForest, knitr, htmltools,
   FactoMineR, missMDA, pcaMethods, caret, ggfortify, gridExtra, hrbrthemes, corrplot, mice,
-  caTools
+  caTools, vegan, pvclust
 )
 #Empty Global Enviroment
 rm(list = ls())
@@ -236,7 +236,7 @@ sapply( lapply(training_set, unique), length)
 training_set <- training_set[, colSums(is.na(training_set)) != nrow(training_set)]
 values_count <- sapply(lapply(training_set, unique), length)
 
-regressor = lm(formula = PHfl ~ ., data = training_set, na.action = "na.omit")
+regressor = lm.fit(formula = PHfl ~ ., data = training_set)
 y_pred = predict(regressor, newdata = test_set)
 summary(y_pred)
 head(cbind(y_pred$PHfl,testing))
@@ -247,6 +247,72 @@ head(cbind(y_pred$PHfl,testing))
 #                       "CLSDfr", "CSLNfl", "CSLNfr", "CSTNfl", "CSTNfr", "SN", "SL", "SW", "PN", "PL", "FN", 
 #                       "FL", "StL", "LCfl", "BLA", "CLA", "FP", "FSP", "PS", "SP", "AAdLC", "AAbLC", "MLC", 
 #                       "SC")
+
+
+
+mising_value <- function(data_p, nx){
+  pr_names<-c("y")
+  for(i in 2:ncol(data_p)) pr_names<-c(pr_names, paste("x", i-1, sep="")) 
+  colnames(data_p)<-pr_names
+  f<-paste(pr_names[1], "~", sep="")
+  for(i in 2:length(pr_names)) f<-paste(f, "+", pr_names[i], sep="")  
+  f<-as.formula(f)
+  fit <- lm(f, data=data_p, na.action = na.exclude)
+  newdata=data.frame(x=nx[1])
+  for(i in 2:length(nx)) newdata<-cbind(newdata, c(nx[i]))
+  colnames(newdata)<-pr_names[2:length(pr_names)]
+  predict(fit, newdata)[[1]]
+}
+
+pop <- combined_data[,1]
+data <- combined_data[,-c(1)]
+data_rep <- data
+
+
+for (i in 1:ncol(data)) {
+  for (j in 1:nrow(data)) {
+    if (is.na(data[j, i])) {
+      yd <- data[, i]
+      nx <- as.numeric(data[j, ])
+      nx <- nx[!is.na(nx)]
+      na_index <- which(!is.na(data[j, , drop = FALSE]))
+      data_p <- data[, na_index]
+      data_p <- cbind(y = yd, data_p)
+      data_p <- data_p[rowSums(is.na(data_p)) == 0, ]
+      data_rep[j,i] <- mising_value(data_p, nx)
+    }
+  }
+}
+
+
+data_rep<-cbind(pop=pop, data_rep)
+
+data<-data_rep
+
+row_n<-data.frame(point=data[,1])
+
+data<-data[,-1]
+
+data_am<-data.frame(dep=data[,12], point=row_n)
+
+fit <- aov(dep ~ point, data=data_am)
+
+summary(fit)
+
+a<-3.019
+
+1-1/a
+
+boxplot(dep ~ point, data=data_am)
+
+for(i in 2:ncol(data)){
+  data[,i]<-(data[,i]-mean(data[,i]))/sd(data[,i])
+}
+
+fit<-prcomp(data[,2:12])
+fviz_pca_biplot(fit, habillage=row_n[,1], addEllipses=T, pointsize = 6)
+
+
 
 
 
