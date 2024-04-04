@@ -131,6 +131,10 @@ combined_data <- complete(imp)
 #1,3,15,17,19,23,29,30,31
 model_fr <- combined_data[ , c(1,3,5,7,9,13,15,17,19,21,23,29,30,31)]
 model_fr <- na.omit(model_fr)
+filter <- apply(model_fr[, -1], 1, function(row) !all(is.na(row)))
+model_fr <- model_fr[filter, ]
+
+
 
 model_fl <- combined_data[ , c(1,2,4,6,8,12,14,16,18,20,22,24,25,26,27,28)]
 model_fl <- na.omit(model_fl)
@@ -209,20 +213,6 @@ grid.arrange(grobs = plots)
 
 
 
-# E. pinnatifida --------------------------------------------------------------------------------------------------
-
-E.pinnatifida$Species <- paste (E.pinnatifida$Species, E.pinnatifida$`Sample ID`, sep=" _ ")
-E.pinnatifida_CD <- E.pinnatifida[, -c(1,3,34:47)]
-imp <- mice(data = E.pinnatifida_CD, method = 'logreg.boot', m = 5, seed=500)
-completed_df <- complete(imp)
-res.pca <- PCA(completed_df, quali.sup = 1)
-fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var = "black",
-                addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95,
-                mean.point = FALSE, ellipse.alpha = 0, repel = TRUE) +
-  scale_color_brewer(palette = "Set1") +
-  theme_minimal()
-
-
 # Multiple Linear Regression Modelling ----------------------------------------------------------------------------
 combined_data <- combined_data %>%
   mutate_at(vars(2:42), ~as.numeric(.))
@@ -257,15 +247,15 @@ mising_value <- function(data_p, nx){
   f<-paste(pr_names[1], "~", sep="")
   for(i in 2:length(pr_names)) f<-paste(f, "+", pr_names[i], sep="")  
   f<-as.formula(f)
-  fit <- lm(f, data=data_p, na.action = na.exclude)
+  fit <- lm(f, data=data_p)
   newdata=data.frame(x=nx[1])
   for(i in 2:length(nx)) newdata<-cbind(newdata, c(nx[i]))
   colnames(newdata)<-pr_names[2:length(pr_names)]
   predict(fit, newdata)[[1]]
 }
 
-pop <- combined_data[,1]
-data <- combined_data[,-c(1)]
+pop <- model_fr[,1]
+data <- model_fr[,-c(1)]
 data_rep <- data
 
 
@@ -312,7 +302,24 @@ for(i in 2:ncol(data)){
 fit<-prcomp(data[,2:12])
 fviz_pca_biplot(fit, habillage=row_n[,1], addEllipses=T, pointsize = 6)
 
+target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
 
+# 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis'                                                                                       
+# 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis', 'E.krasnoborovii', 'E.sineli'                                                         
+# 'E.sineli', 'E.stellata', 'E.stellata.Korea.'                                                                                                 
+# 'E.stellata', 'E.stellata.Korea.'                                                                                                            
+# 'E.albiflora', 'E.lobulata'                                                                                                          
+# 'E.pinnatifida', 'E.byunsanensis', 'E.pungdoensis'                                                                                    
+# 'E.byunsanensis', 'E.pungdoensis'                                                                                                     
+# 'E.albiflora', 'E.lobulata', 'E.sibirica', 'E.tanhoensis', 'E.stellata', 'E.pinnatifida', 'E.byunsanensis'
+
+filtered_data <- data_rep[data_rep$pop %in% target_species, ]
+res.pca <- PCA(filtered_data, quali.sup = 1, graph = FALSE, ncp = 2)
+fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var = "black",
+                addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95,
+                mean.point = FALSE, ellipse.alpha = 0, repel = TRUE) +
+  scale_color_brewer(palette = "Set1") +
+  theme_minimal()
 
 
 
