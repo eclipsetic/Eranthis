@@ -106,6 +106,10 @@ for (df_name in all_dataframes) {
 
 combined_data <- do.call(rbind, imputed_dataframes)
 
+imp <- mice(data = combined_data, method = 'rf', m = 1, seed=500)
+combined_data <- complete(imp)
+
+
 #Making One table
 tables <- lapply(all_dataframes, get)
 tables <- lapply(tables, as.data.frame)
@@ -120,24 +124,25 @@ tables <- lapply(seq_along(all_dataframes), function(i) {
 })
 
 combined_data <- bind_rows(tables)
-combined_data <- combined_data[, -c(1,3,45,46,47,48) ]
+combined_data <- combined_data[, -c(1,3,34:44,48) ]
 combined_data <- combined_data %>%
-  mutate_at(vars(2:42), ~as.numeric(.))
+  mutate_at(vars(2:34), ~as.numeric(.))
 
-imp <- mice(data = combined_data, method = 'rf', m = 1, seed=500)
-combined_data <- complete(imp)
+
 # MLR -------------------------------------------------------------------------------------------------------------
 
 #1,3,15,17,19,23,29,30,31
-model_fr <- combined_data[ , c(1,3,5,7,9,13,15,17,19,21,23,29,30,31)]
-model_fr <- na.omit(model_fr)
+model_fr <- combined_data[ , c(1,3,5,7,9,11,13,15,17,19,21,23,29,30,31,33,34)]
+
 filter <- apply(model_fr[, -1], 1, function(row) !all(is.na(row)))
 model_fr <- model_fr[filter, ]
 
 
 
-model_fl <- combined_data[ , c(1,2,4,6,8,12,14,16,18,20,22,24,25,26,27,28)]
-model_fl <- na.omit(model_fl)
+model_fl <- combined_data[ , c(1,2,4,6,8,10,12,14,16,18,20,22,24,25,26,27,28,32)]
+
+filter <- apply(model_fl[, -1], 1, function(row) !all(is.na(row)))
+model_fl <- model_fl[filter, ]
 
 
 model <- lm(Species ~ . - Species, data = model_fr)
@@ -302,6 +307,9 @@ for(i in 2:ncol(data)){
 fit<-prcomp(data[,2:12])
 fviz_pca_biplot(fit, habillage=row_n[,1], addEllipses=T, pointsize = 6)
 
+
+
+data_rep <- data_rep %>% rename(Species = pop)
 target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
 
 # 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis'                                                                                       
@@ -313,7 +321,7 @@ target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
 # 'E.byunsanensis', 'E.pungdoensis'                                                                                                     
 # 'E.albiflora', 'E.lobulata', 'E.sibirica', 'E.tanhoensis', 'E.stellata', 'E.pinnatifida', 'E.byunsanensis'
 
-filtered_data <- data_rep[data_rep$pop %in% target_species, ]
+filtered_data <- data_rep[data_rep$Species %in% target_species, ]
 res.pca <- PCA(filtered_data, quali.sup = 1, graph = FALSE, ncp = 2)
 fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var = "black",
                 addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95,
