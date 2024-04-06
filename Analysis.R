@@ -259,8 +259,8 @@ mising_value <- function(data_p, nx){
   predict(fit, newdata)[[1]]
 }
 
-pop <- model_fr[,1]
-data <- model_fr[,-c(1)]
+pop <- model_fl[,1]
+data <- model_fl[,-c(1)]
 data_rep <- data
 
 
@@ -310,7 +310,7 @@ fviz_pca_biplot(fit, habillage=row_n[,1], addEllipses=T, pointsize = 6)
 
 
 data_rep <- data_rep %>% rename(Species = pop)
-target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
+target_species <- c('E.albiflora', 'E.lobulata', 'E.sibirica', 'E.tanhoensis', 'E.stellata', 'E.pinnatifida', 'E.byunsanensis')
 
 # 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis'                                                                                       
 # 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis', 'E.krasnoborovii', 'E.sineli'                                                         
