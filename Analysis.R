@@ -132,14 +132,14 @@ combined_data <- combined_data %>%
 # MLR -------------------------------------------------------------------------------------------------------------
 
 #1,3,15,17,19,23,29,30,31
-model_fr <- combined_data[ , c(1,3,5,7,9,11,13,15,17,19,21,23,29,30,31,33,34)]
+model_fr <- combined_data[ , c(1,3,5,7,9,13,15,17,19,21,23,29,30,31,33,34)]
 
 filter <- apply(model_fr[, -1], 1, function(row) !all(is.na(row)))
 model_fr <- model_fr[filter, ]
 
 
 
-model_fl <- combined_data[ , c(1,2,4,6,8,10,12,14,16,18,20,22,24,25,26,27,28,32)]
+model_fl <- combined_data[ , c(1,2,4,6,8,12,14,16,18,20,22,24,25,26,27,28,32)]
 
 filter <- apply(model_fl[, -1], 1, function(row) !all(is.na(row)))
 model_fl <- model_fl[filter, ]
