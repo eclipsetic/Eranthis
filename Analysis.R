@@ -175,48 +175,14 @@ autoplot(pca_res, data = model_fr, colour = 'Species',  loadings = TRUE, loading
 
 
 # Plotting --------------------------------------------------------------------------------------------------------
-target_species <- c('E.sibirica','E.krasnoborovii')
 
-# 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis'                                                                                       
-# 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis', 'E.krasnoborovii', 'E.sineli'                                                         
-# 'E.sineli', 'E.stellata', 'E.stellata.Korea.'                                                                                                 
-# 'E.stellata', 'E.stellata.Korea.'                                                                                                            
-# 'E.albiflora', 'E.lobulata'                                                                                                          
-# 'E.pinnatifida', 'E.byunsanensis', 'E.pungdoensis'                                                                                    
-# 'E.byunsanensis', 'E.pungdoensis'                                                                                                     
-# 'E.albiflora', 'E.lobulata', 'E.sibirica', 'E.tanhoensis', 'E.stellata', 'E.pinnatifida', 'E.byunsanensis'
+data_plot <- reshape2::melt(combined_data, id.vars = "Species")
 
-filtered_data <- model_fr[model_fr$Species %in% target_species, ]
-res.pca <- PCA(filtered_data, quali.sup = 1, graph = FALSE, ncp = 2)
-fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var = "black",
-                addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95,
-                mean.point = FALSE, ellipse.alpha = 0, repel = TRUE) +
-  scale_color_brewer(palette = "Set1") +
+ggplot(data_plot, aes(x = Species, y = value, fill = variable)) +
+  geom_boxplot(data = subset(data, variable %in% c("PHfl", "PHfr")),
+               position = position_dodge(width = 0.8), width = 0.5) +
+  scale_fill_manual(values = c("PHfl" = "slateblue1", "PHfr" = "tomato"), name = "Данные") +
   theme_minimal()
-
-var <- get_pca_var(res.pca)
-corrplot(var$cos2, is.corr=FALSE)
-corrplot(var$contrib, is.corr=FALSE)   
-#Target species
-plots <- list()
-
-for (species_level in target_species) {
-    filtered_data <- subset(model_fr, Species == species_level)
-    if (nrow(filtered_data) > 0) {
-    res.pca <- PCA(filtered_data, quali.sup = 1, graph = FALSE)
-    plot <- fviz_pca_biplot(res.pca, label = "var",
-                            addEllipses = TRUE, pointsize = 2, ellipse.level = 0.95, geom.ind = "point", 
-                            pointshape = 16, alpha.ind = 0.5) +
-      scale_color_brewer(palette = "Set1") +
-      theme_minimal() +
-      ggtitle(paste("Species:", species_level))
-      plots[[length(plots) + 1]] <- plot
-    }
-}
-
-grid.arrange(grobs = plots)
-
-
 
 # Multiple Linear Regression Modelling ----------------------------------------------------------------------------
 combined_data <- combined_data %>%
