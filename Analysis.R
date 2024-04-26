@@ -177,9 +177,11 @@ autoplot(pca_res, data = model_fr, colour = 'Species',  loadings = TRUE, loading
 # Plotting --------------------------------------------------------------------------------------------------------
 
 data_plot <- reshape2::melt(combined_data, id.vars = "Species")
+target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
+data_plot_target <- data_plot[data_plot$Species %in% target_species, ]
 
-ggplot(data_plot, aes(x = Species, y = value, fill = variable)) +
-  geom_boxplot(data = subset(data, variable %in% c("PHfl", "PHfr")),
+ggplot(data_plot_target, aes(x = Species, y = value, fill = variable)) +
+  geom_boxplot(data = subset(data_plot_target, variable %in% c("PHfl", "PHfr")),
                position = position_dodge(width = 0.8), width = 0.5) +
   scale_fill_manual(values = c("PHfl" = "slateblue1", "PHfr" = "tomato"), name = "Данные") +
   theme_minimal()
@@ -276,7 +278,7 @@ fviz_pca_biplot(fit, habillage=row_n[,1], addEllipses=T, pointsize = 6)
 
 
 data_rep <- data_rep %>% rename(Species = pop)
-target_species <- c('E.albiflora', 'E.lobulata', 'E.sibirica', 'E.tanhoensis', 'E.stellata', 'E.pinnatifida', 'E.byunsanensis')
+target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
 
 # 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis'                                                                                       
 # 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis', 'E.krasnoborovii', 'E.sineli'                                                         
