@@ -8,6 +8,9 @@ pacman::p_load(lubridate, purrr, dplyr, tidyr, forecast, zoo, rlang, ggplot2, ti
   FactoMineR, missMDA, pcaMethods, caret, ggfortify, gridExtra, hrbrthemes, corrplot, mice,
   caTools, vegan, pvclust
 )
+pacman::p_load(dplyr, factoextra, fastICA, ggplot2, ggpubr, NMF,  party, psych, randomForest,
+  reshape2, Rtsne, shipunov, tidyverse, tseries, umap, vegan)
+           
 #Empty Global Enviroment
 rm(list = ls())
 
