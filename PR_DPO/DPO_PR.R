@@ -9,7 +9,12 @@ pacman::p_load(dplyr, factoextra, fastICA, ggplot2, ggpubr, NMF,  party, psych, 
 rm(list = ls())
 
 setwd("E:/Eranthis/PR_DPO")
+
+
 pacman::p_load(seqinr, phangorn, msa, ape)
+
+# FASTA_Analyze and align -----------------------------------------------------------------------------------------
+
 
 dnafile <- "atpb_rbcl.fa" 
 DNAfile <- read.fasta(file = dnafile, as.string = TRUE, forceDNAtolower = FALSE)
@@ -22,3 +27,8 @@ myalign_ap <- msaConvert(myalign, type="seqinr::alignment")
 d <- dist.alignment(myalign_ap, "identity")
 hemoTree <- nj(d)
 plot(hemoTree, main="Phylogenetic Tree")
+
+
+# STAT ------------------------------------------------------------------------------------------------------------
+
+

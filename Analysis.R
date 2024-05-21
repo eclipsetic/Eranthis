@@ -6,7 +6,7 @@ pacman::p_load(lubridate, purrr, dplyr, tidyr, forecast, zoo, rlang, ggplot2, ti
   sp, geodata, terra, rasterVis, BiocManager, dismo, XML, jsonlite, rgdal, rJava,
   readxl, rgbif, factoextra, NbClust, cluster, openxlsx, caret, mice, missForest, knitr, htmltools,
   FactoMineR, missMDA, pcaMethods, caret, ggfortify, gridExtra, hrbrthemes, corrplot, mice,
-  caTools, vegan, pvclust
+  caTools, vegan, pvclust, 
 )
 pacman::p_load(dplyr, factoextra, fastICA, ggplot2, ggpubr, NMF,  party, psych, randomForest,
   reshape2, Rtsne, shipunov, tidyverse, tseries, umap, vegan)
@@ -306,3 +306,6 @@ fviz_pca_ind(res.pca, label = "var", habillage = 1, col.var = "black",
 
 fviz_pca_var(res.pca, col.var="black")+
   theme_minimal() 
+
+
+spca <- SamplePCA
