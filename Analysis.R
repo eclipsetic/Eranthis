@@ -3,12 +3,12 @@ Sys.setenv(LANG = "en_US.UTF-8")
 #Library
 library(pacman)
 pacman::p_load(lubridate, purrr, dplyr, tidyr, forecast, zoo, rlang, ggplot2, tidyverse, raster,
-  sp, geodata, terra, rasterVis, BiocManager, dismo, XML, jsonlite, rgdal, rJava,
-  readxl, rgbif, factoextra, NbClust, cluster, openxlsx, caret, mice, missForest, knitr, htmltools,
-  FactoMineR, missMDA, pcaMethods, caret, ggfortify, gridExtra, hrbrthemes, corrplot, mice,
-  caTools, vegan, pvclust, ClassDiscovery
+  sp, geodata, terra, rasterVis, BiocManager, dismo, XML, jsonlite, rJava,
+  readxl, factoextra, NbClust, cluster, openxlsx, caret, mice, missForest, knitr, htmltools,
+  FactoMineR, missMDA, pcaMethods, caret, ggfortify, gridExtra, hrbrthemes, corrplot, caTools, 
+  vegan, pvclust, ClassDiscovery
 )
-
+# rgdal, rgbif
 pacman::p_load(dplyr, factoextra, fastICA, ggplot2, ggpubr, NMF,  party, psych, randomForest,
   reshape2, Rtsne, shipunov, tidyverse, tseries, umap, vegan)
            
@@ -140,14 +140,15 @@ model_fr <- combined_data[ , c(1,3,5,7,9,13,15,17,19,21,23,29,30,31,33,34)]
 
 filter <- apply(model_fr[, -1], 1, function(row) !all(is.na(row)))
 model_fr <- model_fr[filter, ]
-
-
+model_fr<- na.omit(model_fr)
+table(model_fr)
 
 model_fl <- combined_data[ , c(1,2,4,6,8,12,14,16,18,20,22,24,25,26,27,28,32)]
 
 filter <- apply(model_fl[, -1], 1, function(row) !all(is.na(row)))
 model_fl <- model_fl[filter, ]
-
+model_fl <- na.omit(model_fl)
+table(model_fl)
 
 model <- lm(Species ~ . - Species, data = model_fr)
 hist(residuals(model), col = "steelblue")
@@ -294,7 +295,7 @@ target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
 # 'E.albiflora', 'E.lobulata', 'E.sibirica', 'E.tanhoensis', 'E.stellata', 'E.pinnatifida', 'E.byunsanensis'
 
 filtered_data <- data_rep[data_rep$Species %in% target_species, ]
-res.pca <- PCA(data_rep, quali.sup = 1, graph = FALSE, ncp = 2)
+res.pca <- PCA(model_fl, quali.sup = 1, graph = FALSE, ncp = 5)
 fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var = "black",
                 addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95,
                 mean.point = FALSE, ellipse.alpha = 0, repel = TRUE) +
@@ -308,5 +309,9 @@ fviz_pca_ind(res.pca, label = "var", habillage = 1, col.var = "black",
 fviz_pca_var(res.pca, col.var="black")+
   theme_minimal() 
 
-pca_result <- prcomp(iris_data, scale. = TRUE)
-summary(pca_result)
+fviz_eig(res.pca)
+get_pca(res.pca)$contrib
+fviz_pca_contrib(res.pca, choice = c("var"))
+res.pca$eig
+
+                 
