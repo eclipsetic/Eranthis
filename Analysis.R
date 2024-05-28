@@ -144,14 +144,14 @@ model_fr <- combined_data[ , c(1,3,5,7,9,13,15,17,19,21,23,29,30,31,33,34)]
 filter <- apply(model_fr[, -1], 1, function(row) !all(is.na(row)))
 model_fr <- model_fr[filter, ]
 model_fr<- na.omit(model_fr)
-table(model_fr)
+#table(model_fr)
 
 model_fl <- combined_data[ , c(1,2,4,6,8,12,14,16,18,20,22,24,25,26,27,28,32)]
 
 filter <- apply(model_fl[, -1], 1, function(row) !all(is.na(row)))
 model_fl <- model_fl[filter, ]
 model_fl <- na.omit(model_fl)
-table(model_fl)
+#table(model_fl)
 
 model <- lm(Species ~ . - Species, data = model_fr)
 hist(residuals(model), col = "steelblue")
@@ -340,5 +340,5 @@ fviz_eig(res.pca)
 get_pca(res.pca)$contrib
 fviz_pca_contrib(res.pca, choice = c("var"))
 res.pca$eig
-
-                 
+fviz_contrib(res.pca, choice = "var", axes = 1:2)
+fviz_cos2(res.pca, choice = "var", axes = 1:2)                 
