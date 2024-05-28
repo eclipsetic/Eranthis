@@ -11,7 +11,10 @@ pacman::p_load(lubridate, purrr, dplyr, tidyr, forecast, zoo, rlang, ggplot2, ti
 # rgdal, rgbif
 pacman::p_load(dplyr, factoextra, fastICA, ggplot2, ggpubr, NMF,  party, psych, randomForest,
   reshape2, Rtsne, shipunov, tidyverse, tseries, umap, vegan)
-           
+
+# Decision_Tree
+pacman::p_load(datasets, caTools, party, dplyr, magrittr, rattle)           
+
 #Empty Global Enviroment
 rm(list = ls())
 
@@ -210,6 +213,30 @@ summary(y_pred)
 head(cbind(y_pred$PHfl,testing))
 
 
+
+# Decision Tree ---------------------------------------------------------------------------------------------------
+
+set.seed(123)
+split = sample.split(model_fl, SplitRatio = 0.6)
+training_set <- subset(model_fl, split == TRUE)
+test_set <- subset(model_fl, split == FALSE)
+training_set$Species <- as.factor(training_set$Species)
+test_set$Species <- as.factor(test_set$Species)
+
+model <- ctree(Species ~ ., training_set)
+plot(model)
+prp(model)
+
+predict_model <- predict(model, test_set) 
+m_at <- table(test_set$Species, predict_model) 
+
+ac_Test <- sum(diag(m_at)) / sum(m_at)
+print(paste('Accuracy for test is found to be', ac_Test))
+
+fancyRpartPlot(rpart(Species~., data=training_set),yesno=2,split.col="black",nn.col="black", 
+               caption="",palette="Set2",branch.col="black")
+
+corrplot(cor(model_fl[,-1]))
 # columns_to_impute <- c("Species", "PHfl", "PHfr", "BLSLfl", "BLSLfr", "BLSWfl", "BLSWfr", "BLSDfl", "BLSDfr", 
 #                      "BSLNfl", "BSLNfr", "BSTNfl", "BSTNfr", "CLSLfl", "CLSLfr", "CLSWfl", "CLSWfr", "CLSDfl", 
 #                       "CLSDfr", "CSLNfl", "CSLNfr", "CSTNfl", "CSTNfr", "SN", "SL", "SW", "PN", "PL", "FN", 
