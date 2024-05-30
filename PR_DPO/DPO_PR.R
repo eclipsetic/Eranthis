@@ -31,3 +31,10 @@ plot(hemoTree, main="Phylogenetic Tree")
 
 # STAT ------------------------------------------------------------------------------------------------------------
 
+pacman::p_load(httr, XML, dplyr, xml2, rvest, writexl)
+
+flora <- read_html("http://panarcticflora.org/distribution")
+
+tables = flora %>% html_table()
+arctic_flora <- data.frame(tables[[4]])
+write_xlsx(arctic_flora, "E:/Eranthis/arctic_flora.xlsx")
