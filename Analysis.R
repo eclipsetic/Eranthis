@@ -310,7 +310,7 @@ fviz_pca_biplot(fit, habillage=row_n[,1], addEllipses=T, pointsize = 6)
 
 
 data_rep <- data_rep %>% rename(Species = pop)
-target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
+target_species <- c('E.albiflora', 'E.lobulata')
 
 # 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis'                                                                                       
 # 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis', 'E.krasnoborovii', 'E.sineli'                                                         
@@ -321,8 +321,8 @@ target_species <- c('E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis')
 # 'E.byunsanensis', 'E.pungdoensis'                                                                                                     
 # 'E.albiflora', 'E.lobulata', 'E.sibirica', 'E.tanhoensis', 'E.stellata', 'E.pinnatifida', 'E.byunsanensis'
 
-filtered_data <- data_rep[data_rep$Species %in% target_species, ]
-res.pca <- PCA(model_fl, quali.sup = 1, graph = FALSE, ncp = 5)
+filtered_data <- model_fr[model_fr$Species %in% target_species, ]
+res.pca <- PCA(filtered_data, quali.sup = 1, graph = FALSE, ncp = 5)
 fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var = "black",
                 addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95,
                 mean.point = FALSE, ellipse.alpha = 0, repel = TRUE) +
