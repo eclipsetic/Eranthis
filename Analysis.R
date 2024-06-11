@@ -94,7 +94,7 @@ for (species_name in species_list) {
 #Making one table from all
 
 all_dataframes <- list("E.sibirica", "E.tanhoensis", "E.sibirica_x_E.tanhoensis", "E.krasnoborovii", "E.sineli",
-                       "E.stellata", "E.stellata.Korea.", "E.pinnatifida", "E.pungdoensis", "E.albiflora",
+                       "E.stellata", "E.stellata.Korea.China", "E.pinnatifida", "E.pungdoensis", "E.albiflora",
                        "E.lobulata", "E.byunsanensis")
 
 
@@ -131,7 +131,7 @@ tables <- lapply(seq_along(all_dataframes), function(i) {
 })
 
 combined_data <- bind_rows(tables)
-combined_data <- combined_data[, -c(1,3,34:44,48) ]
+combined_data <- combined_data[, -c(1,3,37) ]
 combined_data <- combined_data %>%
   mutate_at(vars(2:34), ~as.numeric(.))
 
