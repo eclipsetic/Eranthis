@@ -103,18 +103,16 @@ imputed_dataframes <- list()
 
 for (df_name in all_dataframes) {
   df <- get(df_name)
-  df <- df[, -c(1,3,45,46,47)]
-  df[, 2:42] <- lapply(df[, 2:42], as.numeric)
+  df <- df[, -c(1,3)]
+  df[, 2:34] <- lapply(df[, 2:34], as.numeric)
   df$Species <- df_name
-  imp <- mice(data = df, method = 'cart', m = 5, seed=500)
+  imp <- mice(data = df, method = 'pmm', m = 1, seed=123)
   completed_df <- complete(imp)
   imputed_dataframes[[df_name]] <- completed_df
 }
 
+E.albiflora <- imputed_dataframes[["E.albiflora"]]
 combined_data <- do.call(rbind, imputed_dataframes)
-
-imp <- mice(data = combined_data, method = 'rf', m = 1, seed=500)
-combined_data <- complete(imp)
 
 
 #Making One table
@@ -259,8 +257,8 @@ mising_value <- function(data_p, nx){
   predict(fit, newdata)[[1]]
 }
 
-pop <- model_fl[,1]
-data <- model_fl[,-c(1)]
+pop <- E.albiflora[,1]
+data <- E.albiflora[,-c(1)]
 data_rep <- data
 
 
@@ -322,7 +320,7 @@ target_species <- c('E.albiflora', 'E.lobulata')
 # 'E.albiflora', 'E.lobulata', 'E.sibirica', 'E.tanhoensis', 'E.stellata', 'E.pinnatifida', 'E.byunsanensis'
 
 filtered_data <- model_fr[model_fr$Species %in% target_species, ]
-res.pca <- PCA(filtered_data, quali.sup = 1, graph = FALSE, ncp = 5)
+res.pca <- PCA(model_fl, quali.sup = 1, graph = FALSE, ncp = 5)
 fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var = "black",
                 addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95,
                 mean.point = FALSE, ellipse.alpha = 0, repel = TRUE) +
