@@ -257,8 +257,8 @@ mising_value <- function(data_p, nx){
   predict(fit, newdata)[[1]]
 }
 
-pop <- E.albiflora[,1]
-data <- E.albiflora[,-c(1)]
+pop <- model_fl[,1]
+data <- model_fl[,-c(1)]
 data_rep <- data
 
 
@@ -308,24 +308,20 @@ fviz_pca_biplot(fit, habillage=row_n[,1], addEllipses=T, pointsize = 6)
 
 
 data_rep <- data_rep %>% rename(Species = pop)
-target_species <- c('E.albiflora', 'E.lobulata')
+target_species <- c('E.stellata', 'E.stellata.Korea.', 'E.sibirica', 'E.tanhoensis', 'E.krasnoborovii' , 'E.sineli')
 
-# 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis'                                                                                       
-# 'E.sibirica', 'E.tanhoensis', 'E.sibirica_x_E.tanhoensis', 'E.krasnoborovii', 'E.sineli'                                                         
-# 'E.sineli', 'E.stellata', 'E.stellata.Korea.'                                                                                                 
-# 'E.stellata', 'E.stellata.Korea.'                                                                                                            
+# 'E.sibirica', 'E.tanhoensis', 'E.krasnoborovii' , 'E.sineli'  
+# 'E.pinnatifida', 'E.byunsanensis', 'E.pungdoensis'
+# 'E.stellata', 'E.stellata.Korea.China'
 # 'E.albiflora', 'E.lobulata'                                                                                                          
-# 'E.pinnatifida', 'E.byunsanensis', 'E.pungdoensis'                                                                                    
-# 'E.byunsanensis', 'E.pungdoensis'                                                                                                     
-# 'E.albiflora', 'E.lobulata', 'E.sibirica', 'E.tanhoensis', 'E.stellata', 'E.pinnatifida', 'E.byunsanensis'
+# 'E.stellata', 'E.stellata.Korea.', 'E.sibirica', 'E.tanhoensis', 'E.krasnoborovii' , 'E.sineli'  
 
-filtered_data <- model_fr[model_fr$Species %in% target_species, ]
-res.pca <- PCA(model_fl, quali.sup = 1, graph = FALSE, ncp = 5)
+filtered_data <- model_fl[model_fl$Species %in% target_species, ]
+res.pca <- PCA(filtered_data, quali.sup = 1, graph = FALSE, ncp = 5)
 fviz_pca_biplot(res.pca, label = "var", habillage = 1, col.var = "black",
                 addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95,
-                mean.point = FALSE, ellipse.alpha = 0, repel = TRUE) +
-  scale_color_brewer(palette = "Set1") +
-  theme_minimal()
+                mean.point = FALSE, ellipse.alpha = 0, repel = TRUE)
+
 
 fviz_pca_ind(res.pca, label = "var", habillage = 1, col.var = "black",
                 addEllipses = TRUE, pointsize = 3, ellipse.level = 0.95,
