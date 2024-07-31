@@ -19,7 +19,7 @@ pacman::p_load(datasets, caTools, party, dplyr, magrittr, rattle)
 rm(list = ls())
 
 # Read all lists in file
-file_path <- "E:/Eranthis/Eranthis_morph.xlsx"
+file_path <- "D:/R/Eranthis/Eranthis_morph.xlsx"
 
 all_sheets <- excel_sheets(file_path)
 
@@ -30,15 +30,15 @@ for (sheet_name in all_sheets) {
 
 # Downloading... --------------------------------------------------------------------------------------------------
 
-dir.create("E:/Eranthis/maps")
-bioclim <- getData(name="worldclim", download=FALSE, path = "E:/Eranthis/maps", res= 2.5, var="bio")
+dir.create("D:/R/Eranthis/maps")
+bioclim <- getData(name="worldclim", download=FALSE, path = "D:/R/Eranthis/maps", res= 2.5, var="bio")
 
 
 # DataFrame -------------------------------------------------------------------------------------------------------
 
 #Spatial Point from GBIF
-dir.create("E:/Eranthis/gbif")
-species_list <- read_xlsx("E:/Eranthis/gbif/PLANT_LIST.xlsx")$species
+dir.create("D:/R/Eranthis/gbif")
+species_list <- read_xlsx("D:/R/Eranthis/gbif/PLANT_LIST.xlsx")$species
 
 occ_data_list <- list()
 
@@ -51,7 +51,7 @@ for (species_name in species_list) {
 
 
 # Путь к папке, где будут сохранены карты
-output_folder <- "E:/Eranthis/gbif/maps"
+output_folder <- "D:/R/Eranthis/gbif/maps"
 dir.create(output_folder, showWarnings = FALSE)
 
 # Функция для получения данных GBIF для указанного вида
