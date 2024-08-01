@@ -31,7 +31,7 @@ for (sheet_name in all_sheets) {
 # Downloading... --------------------------------------------------------------------------------------------------
 
 dir.create("D:/R/Eranthis/maps")
-bioclim <- getData(name="worldclim", download=FALSE, path = "D:/R/Eranthis/maps", res= 2.5, var="bio")
+bioclim <- getData(name="worldclim", download=TRUE, path = "D:/R/Eranthis/maps", res= 2.5, var="bio")
 
 
 # DataFrame -------------------------------------------------------------------------------------------------------
